@@ -122,8 +122,7 @@ def get_models(app_labels):
         Or at least discovered with a get_or_create() call.
     """
 
-    from django.db.models import get_app, get_apps, get_model
-    from django.db.models import get_models as get_all_models
+    from django.apps import apps
 
     # These models are not to be output, e.g. because they can be generated automatically
     # TODO: This should be "appname.modelname" string
@@ -133,7 +132,7 @@ def get_models(app_labels):
 
     # If no app labels are given, return all
     if not app_labels:
-        for app in get_apps():
+        for app in apps.get_apps():
             models += [m for m in get_all_models(app) if m not in EXCLUDED_MODELS]
         return models
 
@@ -142,10 +141,10 @@ def get_models(app_labels):
         # If a specific model is mentioned, get only that model
         if "." in app_label:
             app_label, model_name = app_label.split(".", 1)
-            models.append(get_model(app_label, model_name))
+            models.append(apps.get_model(app_label, model_name))
         # Get all models for a given app
         else:
-            models += [m for m in get_all_models(get_app(app_label)) if m not in EXCLUDED_MODELS]
+            models += [m for m in apps.get_models(apps.get_app(app_label)) if m not in EXCLUDED_MODELS]
 
     return models
 

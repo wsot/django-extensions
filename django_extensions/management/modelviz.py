@@ -11,8 +11,8 @@ import datetime
 import os
 
 import six
+from django.apps import apps
 from django.db import models
-from django.db.models import get_models
 from django.db.models.fields.related import (
     ForeignKey, ManyToManyField, OneToOneField, RelatedField,
 )
@@ -29,7 +29,10 @@ try:
     from django.db.models.fields.generic import GenericRelation
     assert GenericRelation
 except ImportError:
-    from django.contrib.contenttypes.generic import GenericRelation
+    try:
+        from django.contrib.contenttypes.generic import GenericRelation
+    except ImportError:
+        from django.contrib.contenttypes.fields import GenericRelation
 
 from django_extensions.compat import get_apps
 
@@ -104,7 +107,7 @@ def generate_dot(app_labels, **kwargs):
             'models': []
         })
 
-        appmodels = get_models(app)
+        appmodels = apps.get_models(app)
         abstract_models = []
         for appmodel in appmodels:
             abstract_models = abstract_models + [abstract_model for abstract_model in appmodel.__bases__ if hasattr(abstract_model, '_meta') and abstract_model._meta.abstract]
